@@ -5,19 +5,22 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "firekylin.firekylin_android"
+        applicationId "com.firekylin.firekylin_android"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
         manifestPlaceholders = [
-                GETUI_APP_ID : "8obl9Blagu9Kz0u78MmAk7",
-                GETUI_APP_KEY : "JXL02NjukX8okvqkMbHYx1",
-                GETUI_APP_SECRET : "IThKks0Nn56A1Sr2jsVIYA",
-                PACKAGE_NAME : applicationId
+                GETUI_APP_ID : "AX60mZ7MgF9XwbWFbE4uK2",
+                GETUI_APP_KEY : "YOhJywUhqZ5YuzpgcUvwb9",
+                GETUI_APP_SECRET : "OSrGLWK4UH8vbGVP1H07G3",
+                PACKAGE_NAME : applicationId,
+                JPUSH_PKGNAME : applicationId,
+                JPUSH_APPKEY : "f95d2ac83c9cc6607c58a826",
+                JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
         ]
         ndk {
-            abiFilters "armeabi", "armeabi-v7a", "arm64-v8a", "mips", "mips64", "x86", "x86_64"
+            abiFilters "armeabi", "armeabi-v7a", "armeabi-v8a","arm64-v8a", "mips", "mips64", "x86", "x86_64"
         }
     }
     buildTypes {
@@ -33,6 +36,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
-    compile 'com.getui:sdk:2.9.3.0'
+    compile 'com.getui:sdk:+'
     compile 'com.android.support:support-v4:+'
+    compile 'cn.jiguang:jpush:2.1.8'
 }

@@ -1,4 +1,4 @@
-package firekylin.firekylin_android;
+package com.firekylin.firekylin_android;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

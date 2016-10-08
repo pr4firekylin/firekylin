@@ -1,4 +1,4 @@
-package firekylin.firekylin_android;
+package com.firekylin.firekylin_android;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -19,6 +19,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.igexin.sdk.PushManager;
+
+import cn.jpush.android.api.JPushInterface;
+
 
 /**
  * A login screen that offers login via email/password.
@@ -41,8 +44,11 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        //init sdk
+        //init ge tui sdk
         PushManager.getInstance().initialize(this.getApplicationContext());
+        //init ji guang sdk
+        JPushInterface.setDebugMode(true);
+        JPushInterface.init(this);
         // Set up the login form.
         mNameView = (AutoCompleteTextView) findViewById(R.id.name);
 

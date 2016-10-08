@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="firekylin.firekylin_android">
+    package="com.firekylin.firekylin_android">
+
+    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:allowBackup="true"
@@ -18,11 +23,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".RegisterActivity"></activity>
-        <activity android:name=".UserInfoActivity"></activity>
-        <!-- 配置第三方Receiver -->
         <receiver
-            android:name=".GetuiReceiver"
-            android:exported="false">
+        android:name=".GetuiReceiver"
+        android:exported="false">
         <intent-filter>
             <action android:name="com.igexin.sdk.action.${GETUI_APP_ID}" />
         </intent-filter>
@@ -34,4 +37,5 @@
     <!-- 个推3.0电子围栏功能所需权限 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
 </manifest>
