@@ -20,11 +20,22 @@ import android.widget.TextView;
 
 import com.igexin.sdk.PushManager;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import cn.jpush.android.api.JPushInterface;
 
@@ -152,7 +163,8 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            String serverURL = "127.0.0.1";
+
+            String serverURL = "127.0.0.1:8080";
             String jsonData = "{\"name\":\""        +name       +"\","+
                                 "\"password\":\""   +password   +"\"}";
             mAuthTask = new UserLoginTask(serverURL,jsonData);
@@ -222,7 +234,8 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 URL url = new URL(urlPath);
                 HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
-                httpCon.setRequestMethod("GET");
+                httpCon.setRequestMethod("POST");
+                httpCon.setRequestProperty("Charset", "UTF-8");
                 httpCon.setConnectTimeout(3000);
                 httpCon.setReadTimeout(6000);
                 httpCon.setDoInput(true);
@@ -267,8 +280,26 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
+
+            CloseableHttpResponse response = null;
+            String urlAPI = "127.0.0.1";
+            HttpPost httpPost = new HttpPost(urlAPI);
             try {
-                URL url = new URL("127.0.0.1");
+                List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+                nvps.add(new BasicNameValuePair("user_id", user_id+""));
+                nvps.add(new BasicNameValuePair("os_type", os_type));
+                nvps.add(new BasicNameValuePair("channel", channel[0]));
+                nvps.add(new BasicNameValuePair("device_id", PushManager.getInstance().getClientid(LoginActivity.this)));
+                
+                httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+                response = HttpClients.createDefault().execute(httpPost);
+                System.out.println(response.getStatusLine());
+                HttpEntity entity = response.getEntity();
+                //TODO:: do something with entity
+                EntityUtils.consume(entity);
+
+                /*
+                URL url = new URL("127.0.0.1:8080");
                 HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
                 httpCon.setRequestMethod("GET");
                 httpCon.setConnectTimeout(3000);
@@ -278,14 +309,18 @@ public class LoginActivity extends AppCompatActivity {
                 int respCode = httpCon.getResponseCode();
                 if(respCode == 200)
                 {
-                    String jsonData = "{\"user_id\":\""     + user_id                                                       +"\","+
-                                        "\"os_type\":\""    +os_type                                                        +"\","+
-                                        "\"channel\":\""    +channel[0]                                                     +"\","+
-                                        "\"device_id\":\""  + PushManager.getInstance().getClientid(LoginActivity.this)     +"\"}";
                     httpCon.getOutputStream().write(jsonData.getBytes());
                 }
+                */
             }
-            catch (IOException e){}
+            catch (IOException e){e.printStackTrace();}
+            finally {
+                try
+                {
+                    if(response!=null)
+                        response.close();
+                }catch(IOException e){e.printStackTrace();}
+            }
             return null;
         }
         @Override
