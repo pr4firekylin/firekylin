@@ -290,7 +290,7 @@ public class LoginActivity extends AppCompatActivity {
                 nvps.add(new BasicNameValuePair("os_type", os_type));
                 nvps.add(new BasicNameValuePair("channel", channel[0]));
                 nvps.add(new BasicNameValuePair("device_id", PushManager.getInstance().getClientid(LoginActivity.this)));
-                
+
                 httpPost.setEntity(new UrlEncodedFormEntity(nvps));
                 response = HttpClients.createDefault().execute(httpPost);
                 System.out.println(response.getStatusLine());
