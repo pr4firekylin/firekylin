@@ -25,12 +25,23 @@
         <activity android:name=".RegisterActivity"></activity>
         <activity android:name=".MessageInfoActivity"></activity>
         <receiver
-        android:name=".GetuiReceiver"
-        android:exported="false">
-        <intent-filter>
-            <action android:name="com.igexin.sdk.action.${GETUI_APP_ID}" />
-        </intent-filter>
-    </receiver>
+            android:name=".GetuiReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.igexin.sdk.action.${GETUI_APP_ID}" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".JiguangReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="cn.jpush.android.intent.REGISTRATION" />
+                <action android:name="cn.jpush.android.intent.MESSAGE_RECEIVED" />
+                <action android:name="cn.jpush.android.intent.NOTIFICATION_RECEIVED" />
+                <action android:name="cn.jpush.android.intent.NOTIFICATION_OPENED" />
+                <category android:name="com.firekylin.firekylin_android" />
+            </intent-filter>
+        </receiver>
     </application>
     <!-- iBeancon功能所需权限 -->;
     <uses-permission android:name="android.permission.BLUETOOTH"/>

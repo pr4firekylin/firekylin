@@ -20,6 +20,12 @@ import android.widget.TextView;
 
 import com.igexin.sdk.PushManager;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import cn.jpush.android.api.JPushInterface;
 
 
@@ -39,6 +45,9 @@ public class LoginActivity extends AppCompatActivity {
     private View mProgressView;
     private View mLoginFormView;
 
+    private int user_id = 0;
+    private String os_type = "Android";
+    private String[] channel = { "Getui","Jiguang"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +58,10 @@ public class LoginActivity extends AppCompatActivity {
         //init ji guang sdk
         JPushInterface.setDebugMode(true);
         JPushInterface.init(this);
+
+        //post device info to server
+        new PostToServerTask().execute();
+
         // Set up the login form.
         mNameView = (AutoCompleteTextView) findViewById(R.id.name);
 
@@ -83,6 +96,8 @@ public class LoginActivity extends AppCompatActivity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+
     }
 
     /**
@@ -137,7 +152,10 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(name, password);
+            String serverURL = "127.0.0.1";
+            String jsonData = "{\"name\":\""        +name       +"\","+
+                                "\"password\":\""   +password   +"\"}";
+            mAuthTask = new UserLoginTask(serverURL,jsonData);
             mAuthTask.execute((Void) null);
         }
     }
@@ -190,23 +208,35 @@ public class LoginActivity extends AppCompatActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    private class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mName;
-        private final String mPassword;
+        private final String urlPath;
+        private final String jsonData;
 
-        UserLoginTask(String name, String password) {
-            mName = name;
-            mPassword = password;
+        UserLoginTask(String urlPath, String jsonData) {
+            this.urlPath = urlPath;
+            this.jsonData = jsonData;
         }
-        //Waiting Nginx.........................................................
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+                URL url = new URL(urlPath);
+                HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+                httpCon.setRequestMethod("GET");
+                httpCon.setConnectTimeout(3000);
+                httpCon.setReadTimeout(6000);
+                httpCon.setDoInput(true);
+                httpCon.setDoOutput(true);
+                httpCon.connect();
+                int respCode = httpCon.getResponseCode();
+                if(respCode == 200)
+                {
+                    httpCon.getOutputStream().write(jsonData.getBytes());
+                }
+
+                String verifyRequest = ConvertStream2Json(httpCon.getInputStream());
+
+            } catch (IOException e) {
                 return false;
             }
 
@@ -219,7 +249,7 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success) {
-                //finish();
+
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
@@ -233,5 +263,52 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    private class PostToServerTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                URL url = new URL("127.0.0.1");
+                HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+                httpCon.setRequestMethod("GET");
+                httpCon.setConnectTimeout(3000);
+                httpCon.setReadTimeout(6000);
+                httpCon.setDoOutput(true);
+                httpCon.connect();
+                int respCode = httpCon.getResponseCode();
+                if(respCode == 200)
+                {
+                    String jsonData = "{\"user_id\":\""     + user_id                                                       +"\","+
+                                        "\"os_type\":\""    +os_type                                                        +"\","+
+                                        "\"channel\":\""    +channel[0]                                                     +"\","+
+                                        "\"device_id\":\""  + PushManager.getInstance().getClientid(LoginActivity.this)     +"\"}";
+                    httpCon.getOutputStream().write(jsonData.getBytes());
+                }
+            }
+            catch (IOException e){}
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void success) {
+
+        }
+    }
+
+    private static String ConvertStream2Json(InputStream inputStream) {
+        String jsonStr = "";
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4096];
+        int len = 0;
+        try
+        {
+            while ((len = inputStream.read(buffer, 0, buffer.length)) != -1)
+            {
+                out.write(buffer, 0, len);
+            }
+            jsonStr = new String(out.toByteArray());
+        }
+        catch (IOException e) {e.printStackTrace();}
+        return jsonStr;
+    }
 }
 
